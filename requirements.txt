@@ -1,0 +1,25 @@
+# Core AI & LLM
+google-genai>=0.1.1
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Text-to-Speech
+edge-tts>=6.1.9
+mutagen>=1.47.0
+
+# Computer Vision & Video Processing
+opencv-python-headless>=4.8.0
+numpy>=1.24.0
+moviepy>=1.0.3
+Pillow>=10.0.0
+
+# Web Backend & API
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+python-multipart>=0.0.9
+requests>=2.31.0
+aiofiles>=23.2.1
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm>=4.66.0
