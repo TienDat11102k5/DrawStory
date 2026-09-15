@@ -12,13 +12,33 @@ if sys.platform == "win32":
     except Exception:
         pass
 import edge_tts
-from typing import Optional
+from typing import Optional, Union
+
+def _format_rate(rate: Union[str, float]) -> str:
+    if isinstance(rate, (int, float)):
+        pct = int(round((float(rate) - 1.0) * 100))
+        return f"+{pct}%" if pct >= 0 else f"{pct}%"
+    return str(rate)
+
+VOICE_PROFILES = {
+    # 6 Phong cách giọng tiếng Việt ổn định 100%
+    "vi-VN-HoaiMyNeural": {"voice": "vi-VN-HoaiMyNeural", "rate_offset": 0},
+    "vi-VN-HoaiMy-Deep": {"voice": "vi-VN-HoaiMyNeural", "rate_offset": -8},
+    "vi-VN-HoaiMy-Lively": {"voice": "vi-VN-HoaiMyNeural", "rate_offset": 8},
+    "vi-VN-NamMinhNeural": {"voice": "vi-VN-NamMinhNeural", "rate_offset": 0},
+    "vi-VN-NamMinh-Deep": {"voice": "vi-VN-NamMinhNeural", "rate_offset": -8},
+    "vi-VN-NamMinh-Youth": {"voice": "vi-VN-NamMinhNeural", "rate_offset": 8},
+}
 
 DEFAULT_VOICE = "vi-VN-HoaiMyNeural"
 
 SUPPORTED_VOICES = {
     "vi_female": "vi-VN-HoaiMyNeural",     # Nữ miền Bắc truyền cảm
+    "vi_female_deep": "vi-VN-HoaiMy-Deep", # Nữ trầm lắng kể chuyện
+    "vi_female_lively": "vi-VN-HoaiMy-Lively", # Nữ tươi trẻ hoạt hình
     "vi_male": "vi-VN-NamMinhNeural",      # Nam miền Bắc trầm ấm
+    "vi_male_deep": "vi-VN-NamMinh-Deep",  # Nam sâu lắng tài liệu
+    "vi_male_youth": "vi-VN-NamMinh-Youth",# Nam trẻ trung review
     "en_female": "en-US-JennyNeural",      # Nữ tiếng Anh tự nhiên
     "en_male": "en-US-GuyNeural",          # Nam tiếng Anh
 }
@@ -27,22 +47,43 @@ async def synthesize_speech_async(
     text: str,
     output_path: str,
     voice: str = DEFAULT_VOICE,
-    rate: str = "+0%",
+    rate: Union[str, float] = 1.0,
     volume: str = "+0%"
 ) -> str:
     """
     Sinh file âm thanh từ văn bản kịch bản sử dụng Microsoft Edge TTS.
     """
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
-    communicate = edge_tts.Communicate(text, voice, rate=rate, volume=volume)
-    await communicate.save(output_path)
+    
+    clean_text = text.replace("DrawStory", "Draw Story")
+    profile = VOICE_PROFILES.get(voice, {"voice": voice, "rate_offset": 0})
+    actual_voice = profile.get("voice", voice)
+    rate_offset = profile.get("rate_offset", 0)
+
+    if isinstance(rate, (int, float)):
+        final_rate = max(0.25, min(2.0, rate + (rate_offset / 100.0)))
+    else:
+        final_rate = rate
+    rate_str = _format_rate(final_rate)
+
+    for attempt in range(2):
+        try:
+            communicate = edge_tts.Communicate(clean_text, actual_voice, rate=rate_str, volume=volume)
+            await communicate.save(output_path)
+            return output_path
+        except Exception as e:
+            if attempt == 0:
+                await asyncio.sleep(0.3)
+                rate_str = "+0%"
+            else:
+                raise e
     return output_path
 
 def synthesize_speech(
     text: str,
     output_path: str,
     voice: str = DEFAULT_VOICE,
-    rate: str = "+0%",
+    rate: Union[str, float] = 1.0,
     volume: str = "+0%"
 ) -> str:
     """Wrapper đồng bộ cho synthesize_speech_async"""
@@ -59,7 +100,11 @@ def get_audio_duration(audio_path: str) -> float:
         return float(audio.info.length)
     except Exception:
         try:
-            from moviepy.editor import AudioFileClip
+            try:
+                from moviepy import AudioFileClip
+            except (ImportError, AttributeError):
+                import importlib
+                AudioFileClip = importlib.import_module("moviepy.editor").AudioFileClip
             with AudioFileClip(audio_path) as clip:
                 return float(clip.duration)
         except Exception as e:

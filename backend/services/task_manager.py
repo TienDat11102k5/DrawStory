@@ -111,7 +111,7 @@ class TaskManager:
                     f"Cảnh {scene_num}/{total_scenes}: Đang tạo giọng đọc thuyết minh..."
                 )
                 audio_path = os.path.join(task_temp_dir, f"scene_{scene_num}.mp3")
-                synthesize_speech(scene.narration, audio_path, voice=req.voice_id)
+                synthesize_speech(scene.narration, audio_path, voice=req.voice_id, rate=req.voice_rate)
                 duration = get_audio_duration(audio_path)
 
                 # 1.2 Ảnh minh họa
@@ -219,6 +219,7 @@ class TaskManager:
                     "project_id": project_id,
                     "title": raw_title[:60] if raw_title else "Dự án mới",
                     "voice_id": req.voice_id,
+                    "voice_rate": req.voice_rate,
                     "scenes_count": len(req.scenes),
                     "scenes": [s.model_dump() for s in req.scenes],
                     "video_url": video_url,

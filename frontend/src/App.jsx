@@ -4,6 +4,7 @@ import Step1_IdeaInput from './components/Step1_IdeaInput';
 import Step2_Storyboard from './components/Step2_Storyboard';
 import Step3_RenderPlayer from './components/Step3_RenderPlayer';
 import ProjectsList from './components/ProjectsList';
+import Sidebar from './components/Sidebar';
 import { checkBackendHealth, getVoices, generateStory, startVideoRender, getTaskStatus, saveProject } from './services/api';
 
 export default function App() {
@@ -15,9 +16,14 @@ export default function App() {
   const [topic, setTopic] = useState("Lợi ích của sự tập trung sâu trong công việc");
   const [scenesCount, setScenesCount] = useState(3);
   const [selectedVoice, setSelectedVoice] = useState("vi-VN-HoaiMyNeural");
+  const [voiceRate, setVoiceRate] = useState(1.0);
   const [voices, setVoices] = useState([
-    { voice_id: "vi-VN-HoaiMyNeural", name: "Hoài My (Nữ - Bắc Bộ)" },
-    { voice_id: "vi-VN-NamMinhNeural", name: "Nam Minh (Nam - Bắc Bộ)" }
+    { voice_id: "vi-VN-HoaiMyNeural", name: "Hoài My (Truyền cảm - Chuẩn)" },
+    { voice_id: "vi-VN-HoaiMy-Deep", name: "Hoài My (Trầm lắng - Kể chuyện)" },
+    { voice_id: "vi-VN-HoaiMy-Lively", name: "Hoài My (Tươi trẻ - Hoạt hình)" },
+    { voice_id: "vi-VN-NamMinhNeural", name: "Nam Minh (Trầm ấm - Chuẩn)" },
+    { voice_id: "vi-VN-NamMinh-Deep", name: "Nam Minh (Sâu lắng - Tài liệu)" },
+    { voice_id: "vi-VN-NamMinh-Youth", name: "Nam Minh (Năng động - Review)" }
   ]);
 
   // Data State
@@ -72,6 +78,7 @@ export default function App() {
           title: res.title,
           topic: res.topic || topic,
           voice_id: selectedVoice,
+          voice_rate: voiceRate,
           scenes_count: res.scenes.length,
           scenes: res.scenes,
           status: "DRAFT"
@@ -98,6 +105,7 @@ export default function App() {
       const res = await startVideoRender({
         scenes,
         voiceId: selectedVoice,
+        voiceRate: voiceRate,
         projectId: storyData?.project_id,
         title: storyData?.title || topic,
         enableHand: true,
@@ -143,6 +151,7 @@ export default function App() {
     setStoryData(proj);
     setScenes(proj.scenes || []);
     if (proj.voice_id) setSelectedVoice(proj.voice_id);
+    if (proj.voice_rate) setVoiceRate(proj.voice_rate);
     if (proj.topic) setTopic(proj.topic);
     
     // LUÔN LUÔN VÀO STEP 2 (Storyboard Editor) để người dùng xem và chỉnh sửa kịch bản & ảnh
@@ -165,9 +174,15 @@ export default function App() {
         onChangeTab={(tab) => setActiveTab(tab)} 
       />
 
+      <Sidebar 
+        activeTab={activeTab}
+        onChangeTab={(tab) => setActiveTab(tab)}
+      />
+
       <main style={{ 
         flex: 1, 
         padding: '28px 32px', 
+        paddingLeft: '80px',
         width: '100%', 
         maxWidth: '100%', 
         margin: '0 auto',
@@ -184,6 +199,8 @@ export default function App() {
                 setScenesCount={setScenesCount}
                 selectedVoice={selectedVoice}
                 setSelectedVoice={setSelectedVoice}
+                voiceRate={voiceRate}
+                setVoiceRate={setVoiceRate}
                 voices={voices}
                 onGenerateStory={handleGenerateStory}
                 isLoading={isGeneratingStory}
@@ -196,6 +213,8 @@ export default function App() {
                 scenes={scenes}
                 setScenes={setScenes}
                 selectedVoice={selectedVoice}
+                voiceRate={voiceRate}
+                setVoiceRate={setVoiceRate}
                 onBack={() => setCurrentStep(1)}
                 onStartRender={handleStartRender}
                 isSubmitting={isStartingRender}

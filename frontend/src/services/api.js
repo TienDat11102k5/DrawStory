@@ -23,11 +23,11 @@ export async function getVoices() {
   return res.json();
 }
 
-export async function previewVoice(text, voiceId) {
+export async function previewVoice(text, voiceId, rate = 1.0) {
   const res = await fetch(`${API_BASE_URL}/audio/preview`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, voice_id: voiceId }),
+    body: JSON.stringify({ text, voice_id: voiceId, rate: Number(rate) }),
   });
   if (!res.ok) throw new Error("Lỗi khi tạo audio nghe thử");
   return res.json();
@@ -53,7 +53,7 @@ export async function generateStory({ topic, scenesCount = 2, language = "vi", t
   return res.json();
 }
 
-export async function startVideoRender({ scenes, voiceId, projectId = null, title = null, enableHand = true, enableSubtitles = true }) {
+export async function startVideoRender({ scenes, voiceId, voiceRate = 1.0, projectId = null, title = null, enableHand = true, enableSubtitles = true }) {
   const res = await fetch(`${API_BASE_URL}/video/render`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -67,6 +67,7 @@ export async function startVideoRender({ scenes, voiceId, projectId = null, titl
         image_url: s.image_url || null, // BẮT BUỘC TRUYỀN IMAGE_URL CỦA NGƯỜI DÙNG
       })),
       voice_id: voiceId,
+      voice_rate: Number(voiceRate),
       aspect_ratio: "9:16",
       enable_hand_drawing: enableHand,
       enable_subtitles: enableSubtitles,

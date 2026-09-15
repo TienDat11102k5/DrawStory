@@ -27,6 +27,7 @@ def run_pipeline(
     topic: str,
     scenes_count: int = 2,
     voice_id: str = "vi-VN-HoaiMyNeural",
+    voice_rate: float = 1.0,
     output_filename: str = "drawstory_demo.mp4"
 ) -> str:
     start_time = time.time()
@@ -60,7 +61,7 @@ def run_pipeline(
         
         # 3.1. Tạo Audio TTS
         audio_path = os.path.join(temp_dir, f"scene_{scene.scene_id}.mp3")
-        synthesize_speech(scene.narration, audio_path, voice=voice_id)
+        synthesize_speech(scene.narration, audio_path, voice=voice_id, rate=voice_rate)
         duration = get_audio_duration(audio_path)
         print(f"-> Đã tạo Voice: {audio_path} (Thời lượng: {duration:.2f}s)")
 

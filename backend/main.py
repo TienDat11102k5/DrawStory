@@ -16,7 +16,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.config import settings
+from backend.logger import logger
 from backend.routers import story, audio, video, projects, upload
+
+logger.info(f"DrawStory AI v{settings.APP_VERSION} initialized. Logging to {settings.LOG_FILE}")
 
 app = FastAPI(
     title=settings.APP_NAME,

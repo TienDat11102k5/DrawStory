@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     OUTPUTS_DIR: str = os.path.join(DATA_DIR, "outputs")
     TEMP_DIR: str = os.path.join(DATA_DIR, "temp")
     ASSETS_DIR: str = os.path.join(BASE_DIR, "assets")
+    LOGS_DIR: str = os.path.join(BASE_DIR, "logs")
+    LOG_FILE: str = os.path.join(LOGS_DIR, "app.log")
 
     # AI & Rendering
     DEFAULT_VOICE: str = "vi-VN-HoaiMyNeural"
@@ -35,3 +37,4 @@ settings = Settings()
 os.makedirs(settings.OUTPUTS_DIR, exist_ok=True)
 os.makedirs(settings.TEMP_DIR, exist_ok=True)
 os.makedirs(settings.ASSETS_DIR, exist_ok=True)
+os.makedirs(settings.LOGS_DIR, exist_ok=True)

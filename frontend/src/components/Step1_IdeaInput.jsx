@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Volume2, Wand2, CheckCircle2, Play, Layers, Palette, Clock, Video } from 'lucide-react';
+import { Sparkles, Volume2, Wand2, CheckCircle2, Play, Layers, Palette, Clock, Video, Minus, Plus } from 'lucide-react';
 import { previewVoice } from '../services/api';
 
 const SAMPLE_TOPICS = [
@@ -18,6 +18,8 @@ export default function Step1_IdeaInput({
   setScenesCount,
   selectedVoice,
   setSelectedVoice,
+  voiceRate = 1.0,
+  setVoiceRate,
   voices,
   onGenerateStory,
   isLoading
@@ -28,7 +30,7 @@ export default function Step1_IdeaInput({
   const handlePreviewVoice = async (voiceId) => {
     try {
       setPlayingVoice(true);
-      const res = await previewVoice("Xin chào! Tôi là giọng đọc thuyết minh của bạn trên DrawStory AI.", voiceId);
+      const res = await previewVoice("Xin chào! Đây là giọng đọc thuyết minh mẫu cho video của bạn.", voiceId, voiceRate);
       if (res.audio_url) {
         if (audioEl) audioEl.pause();
         const fullUrl = res.audio_url.startsWith("http") ? res.audio_url : `http://127.0.0.1:8000${res.audio_url}`;
@@ -168,103 +170,175 @@ export default function Step1_IdeaInput({
           </div>
         </div>
 
-        {/* Settings Grid: Voice & Scenes Count */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
-          {/* Voice Selection */}
+        {/* Giọng đọc thuyết minh */}
+        <div>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#e2e8f0' }}>
+            Giọng đọc thuyết minh:
+          </label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <select
+              value={selectedVoice}
+              onChange={(e) => setSelectedVoice(e.target.value)}
+              style={{
+                flex: 1,
+                height: '46px',
+                padding: '0 14px',
+                borderRadius: '12px',
+                background: 'rgba(9, 13, 22, 0.7)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                color: '#fff',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer'
+              }}
+            >
+              {voices.map((v) => (
+                <option key={v.voice_id} value={v.voice_id} style={{ background: '#111827', color: '#fff' }}>
+                  {v.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => handlePreviewVoice(selectedVoice)}
+              disabled={playingVoice}
+              title="Nghe thử giọng đọc"
+              className="btn-secondary"
+              style={{ width: '46px', height: '46px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+            >
+              <Volume2 size={18} color="#818cf8" />
+            </button>
+          </div>
+        </div>
+
+        {/* Hàng chung: Số phân cảnh & Tốc độ đọc */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.35fr', gap: '16px' }}>
+          {/* Số phân cảnh */}
           <div>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#e2e8f0' }}>
-              Giọng đọc thuyết minh:
+              Số phân cảnh:
             </label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <select
-                value={selectedVoice}
-                onChange={(e) => setSelectedVoice(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: '12px',
-                  borderRadius: '12px',
-                  background: 'rgba(9, 13, 22, 0.7)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  color: '#fff',
-                  fontSize: '14px',
-                  outline: 'none',
-                  cursor: 'pointer'
-                }}
-              >
-                {voices.map((v) => (
-                  <option key={v.voice_id} value={v.voice_id} style={{ background: '#111827', color: '#fff' }}>
-                    {v.name}
-                  </option>
-                ))}
-              </select>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              height: '46px',
+              background: 'rgba(9, 13, 22, 0.7)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '12px',
+              padding: '4px'
+            }}>
               <button
                 type="button"
-                onClick={() => handlePreviewVoice(selectedVoice)}
-                disabled={playingVoice}
-                title="Nghe thử giọng đọc"
-                className="btn-secondary"
-                style={{ padding: '0 14px' }}
+                onClick={() => setScenesCount(Math.max(1, scenesCount - 1))}
+                disabled={scenesCount <= 1}
+                title="Giảm 1 cảnh"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '8px',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: 'none',
+                  color: scenesCount <= 1 ? '#64748b' : '#fff',
+                  cursor: scenesCount <= 1 ? 'not-allowed' : 'pointer'
+                }}
               >
-                <Volume2 size={18} color="#818cf8" />
+                <Minus size={16} />
+              </button>
+              
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <span style={{ fontSize: '15px', fontWeight: 700, color: '#818cf8' }}>
+                  {scenesCount}
+                </span>
+                <span style={{ fontSize: '13px', color: '#94a3b8', marginLeft: '5px' }}>
+                  cảnh
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setScenesCount(Math.min(10, scenesCount + 1))}
+                disabled={scenesCount >= 10}
+                title="Tăng 1 cảnh"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '8px',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: 'none',
+                  color: scenesCount >= 10 ? '#64748b' : '#fff',
+                  cursor: scenesCount >= 10 ? 'not-allowed' : 'pointer'
+                }}
+              >
+                <Plus size={16} />
               </button>
             </div>
           </div>
 
-          {/* Scenes Count */}
+          {/* Tốc độ đọc */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <label style={{ fontSize: '14px', fontWeight: 600, color: '#e2e8f0' }}>
-                Số phân cảnh:
+                Tốc độ đọc:
               </label>
-              <span style={{ fontSize: '12px', color: '#818cf8', fontWeight: 700 }}>
-                {scenesCount} cảnh
+              <span style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: '#818cf8',
+                background: 'rgba(99, 102, 241, 0.15)',
+                padding: '1px 7px',
+                borderRadius: '6px',
+                border: '1px solid rgba(99, 102, 241, 0.3)'
+              }}>
+                {voiceRate}x
               </span>
             </div>
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              {[2, 3, 4, 5].map((num) => (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => setScenesCount(num)}
-                  style={{
-                    flex: 1,
-                    padding: '11px 4px',
-                    borderRadius: '10px',
-                    background: scenesCount === num ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : 'rgba(255, 255, 255, 0.04)',
-                    border: scenesCount === num ? '1px solid #818cf8' : '1px solid rgba(255, 255, 255, 0.08)',
-                    color: '#fff',
-                    fontWeight: 700,
-                    fontSize: '13px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {num}
-                </button>
-              ))}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={scenesCount}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value) || 1;
-                    setScenesCount(Math.min(10, Math.max(1, val)));
-                  }}
-                  style={{
-                    width: '54px',
-                    padding: '10px 4px',
-                    borderRadius: '10px',
-                    background: 'rgba(9, 13, 22, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    color: '#fff',
-                    fontSize: '13px',
-                    textAlign: 'center',
-                    fontWeight: 700,
-                    outline: 'none'
-                  }}
-                  title="Nhập số cảnh (1-10)"
-                />
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              height: '46px',
+              background: 'rgba(9, 13, 22, 0.7)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '12px',
+              padding: '0 12px'
+            }}>
+              <input
+                type="range"
+                min="0.25"
+                max="2.0"
+                step="0.05"
+                value={voiceRate}
+                onChange={(e) => setVoiceRate(parseFloat(e.target.value))}
+                style={{ flex: 1, accentColor: '#6366f1', cursor: 'pointer', height: '5px' }}
+              />
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {[0.75, 1.0, 1.25, 1.5].map((spd) => (
+                  <button
+                    key={spd}
+                    type="button"
+                    onClick={() => setVoiceRate(spd)}
+                    style={{
+                      padding: '3px 7px',
+                      borderRadius: '6px',
+                      fontSize: '11px',
+                      fontWeight: voiceRate === spd ? 700 : 500,
+                      background: voiceRate === spd ? '#6366f1' : 'rgba(255, 255, 255, 0.06)',
+                      color: '#fff',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {spd}x
+                  </button>
+                ))}
               </div>
             </div>
           </div>

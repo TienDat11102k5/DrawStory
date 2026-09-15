@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Palette, Activity, Film, FolderClock, Key } from 'lucide-react';
+import { Sparkles, Palette, Activity, Key } from 'lucide-react';
 import ApiKeyModal from './ApiKeyModal';
 
 export default function Navbar({ backendOnline, activeTab = 'studio', onChangeTab = () => {} }) {
   const [isKeyModalOpen, setIsKeyModalOpen] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     const key = localStorage.getItem('gemini_api_key');
@@ -36,10 +37,11 @@ export default function Navbar({ backendOnline, activeTab = 'studio', onChangeTa
         background: 'rgba(9, 13, 22, 0.9)',
         width: '100%'
       }}>
-        {/* Brand Logo */}
+        {/* Brand Logo - Bấm vào để về Trang Chủ */}
         <div 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
-          onClick={() => onChangeTab('studio')}
+          onClick={() => onChangeTab('studio')} 
+          title="Về Trang Chủ (Studio)"
+          style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', userSelect: 'none' }}
         >
           <div style={{
             width: '38px',
@@ -49,10 +51,28 @@ export default function Navbar({ backendOnline, activeTab = 'studio', onChangeTa
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)'
+            boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)',
+            overflow: 'hidden'
           }}>
-            <Palette size={22} color="#fff" />
+            {!logoError ? (
+              <img 
+                src="/logo.png" 
+                alt="Logo" 
+                onError={(e) => {
+                  if (!e.target.dataset.triedJpg) {
+                    e.target.dataset.triedJpg = 'true';
+                    e.target.src = '/logo.jpg';
+                  } else {
+                    setLogoError(true);
+                  }
+                }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              />
+            ) : (
+              <Palette size={22} color="#fff" />
+            )}
           </div>
+
           <div>
             <h1 style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-0.5px' }}>
               DrawStory <span style={{ color: '#818cf8' }}>AI</span>
@@ -63,56 +83,7 @@ export default function Navbar({ backendOnline, activeTab = 'studio', onChangeTa
           </div>
         </div>
 
-        {/* Center Navigation Tabs */}
-        <div style={{
-          display: 'flex',
-          background: 'rgba(255, 255, 255, 0.04)',
-          padding: '4px',
-          borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.08)'
-        }}>
-          <button
-            type="button"
-            onClick={() => handleTabClick('studio')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 18px',
-              borderRadius: '9px',
-              border: 'none',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              background: activeTab === 'studio' ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : 'transparent',
-              color: activeTab === 'studio' ? '#fff' : '#94a3b8'
-            }}
-          >
-            <Film size={15} /> Studio Tạo Mới
-          </button>
 
-          <button
-            type="button"
-            onClick={() => handleTabClick('projects')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 18px',
-              borderRadius: '9px',
-              border: 'none',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              background: activeTab === 'projects' ? 'linear-gradient(135deg, #4f46e5, #7c3aed)' : 'transparent',
-              color: activeTab === 'projects' ? '#fff' : '#94a3b8'
-            }}
-          >
-            <FolderClock size={15} /> Dự Án Đã Lưu (Lịch Sử)
-          </button>
-        </div>
 
         {/* Right Tools: Gemini Key & Backend Status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>

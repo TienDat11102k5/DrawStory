@@ -16,25 +16,49 @@ router = APIRouter(prefix="/audio", tags=["Âm thanh (Audio & TTS)"])
 VOICE_LIST = [
     VoiceInfo(
         voice_id="vi-VN-HoaiMyNeural",
-        name="Hoài My (Nữ - Bắc Bộ)",
+        name="Hoài My (Truyền cảm - Chuẩn)",
+        gender="Female",
+        language="vi-VN"
+    ),
+    VoiceInfo(
+        voice_id="vi-VN-HoaiMy-Deep",
+        name="Hoài My (Trầm lắng - Kể chuyện)",
+        gender="Female",
+        language="vi-VN"
+    ),
+    VoiceInfo(
+        voice_id="vi-VN-HoaiMy-Lively",
+        name="Hoài My (Tươi trẻ - Hoạt hình)",
         gender="Female",
         language="vi-VN"
     ),
     VoiceInfo(
         voice_id="vi-VN-NamMinhNeural",
-        name="Nam Minh (Nam - Bắc Bộ)",
+        name="Nam Minh (Trầm ấm - Chuẩn)",
+        gender="Male",
+        language="vi-VN"
+    ),
+    VoiceInfo(
+        voice_id="vi-VN-NamMinh-Deep",
+        name="Nam Minh (Sâu lắng - Tài liệu)",
+        gender="Male",
+        language="vi-VN"
+    ),
+    VoiceInfo(
+        voice_id="vi-VN-NamMinh-Youth",
+        name="Nam Minh (Năng động - Review)",
         gender="Male",
         language="vi-VN"
     ),
     VoiceInfo(
         voice_id="en-US-JennyNeural",
-        name="Jenny (Nữ - US)",
+        name="Jenny (Nữ - Tiếng Anh)",
         gender="Female",
         language="en-US"
     ),
     VoiceInfo(
         voice_id="en-US-GuyNeural",
-        name="Guy (Nam - US)",
+        name="Guy (Nam - Tiếng Anh)",
         gender="Male",
         language="en-US"
     ),
@@ -57,7 +81,8 @@ async def preview_voice(req: AudioPreviewRequest):
         await synthesize_speech_async(
             text=req.text,
             output_path=preview_path,
-            voice=req.voice_id
+            voice=req.voice_id,
+            rate=req.rate
         )
         duration = get_audio_duration(preview_path)
         

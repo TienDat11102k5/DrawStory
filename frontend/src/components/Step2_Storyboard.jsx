@@ -10,6 +10,8 @@ export default function Step2_Storyboard({
   scenes,
   setScenes,
   selectedVoice,
+  voiceRate = 1.0,
+  setVoiceRate,
   onBack,
   onStartRender,
   isSubmitting
@@ -39,6 +41,7 @@ export default function Step2_Storyboard({
           title: storyData?.title || scenes[0]?.narration?.slice(0, 30) || "Dự án mới",
           topic: storyData?.topic || "",
           voice_id: selectedVoice,
+          voice_rate: voiceRate,
           scenes_count: scenes.length,
           scenes: scenes,
           status: "DRAFT"
@@ -51,7 +54,7 @@ export default function Step2_Storyboard({
     }, 1200);
 
     return () => clearTimeout(timer);
-  }, [scenes, selectedVoice]);
+  }, [scenes, selectedVoice, voiceRate]);
 
   const handleCopyPrompt = (index, promptText) => {
     if (!promptText) return;
@@ -96,7 +99,7 @@ export default function Step2_Storyboard({
   const handlePreviewSceneVoice = async (index, text) => {
     try {
       setPlayingIdx(index);
-      const res = await previewVoice(text, selectedVoice);
+      const res = await previewVoice(text, selectedVoice, voiceRate);
       if (res.audio_url) {
         const fullUrl = res.audio_url.startsWith("http") ? res.audio_url : `http://127.0.0.1:8000${res.audio_url}`;
         const audio = new Audio(fullUrl);
@@ -140,6 +143,7 @@ export default function Step2_Storyboard({
         title: storyData?.title || scenes[0]?.narration.slice(0, 30) || "Dự án mới",
         topic: storyData?.topic || "",
         voice_id: selectedVoice,
+        voice_rate: voiceRate,
         scenes_count: scenes.length,
         scenes: scenes,
         status: "DRAFT"
@@ -183,6 +187,33 @@ export default function Step2_Storyboard({
 
         {/* Buttons: Auto Save Indicator, Save Draft & Start Render */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {/* Voice Speed Adjuster */}
+          {setVoiceRate && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              borderRadius: '10px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              fontSize: '12px'
+            }}>
+              <span style={{ color: '#94a3b8' }}>Tốc độ giọng:</span>
+              <input
+                type="range"
+                min="0.25"
+                max="2.0"
+                step="0.05"
+                value={voiceRate}
+                onChange={(e) => setVoiceRate(parseFloat(e.target.value))}
+                style={{ width: '70px', accentColor: '#6366f1', cursor: 'pointer' }}
+                title="Kéo để chỉnh tốc độ đọc (0.25x - 2.0x)"
+              />
+              <span style={{ color: '#818cf8', fontWeight: 700, minWidth: '32px' }}>{voiceRate}x</span>
+            </div>
+          )}
+
           {/* Auto-Save Indicator Badge */}
           <div style={{
             display: 'inline-flex',
